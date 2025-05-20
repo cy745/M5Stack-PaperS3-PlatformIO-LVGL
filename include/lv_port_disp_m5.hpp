@@ -48,7 +48,7 @@ static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_ma
  *   GLOBAL FUNCTIONS
  **********************/
 
-void lv_port_disp_init(void) {
+inline void lv_port_disp_init(void) {
     /*-------------------------
      * Initialize your display
      * -----------------------*/
@@ -60,12 +60,18 @@ void lv_port_disp_init(void) {
     lv_display_t *disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
     lv_display_set_flush_cb(disp, disp_flush);
 
-    /* Example 1
-     * One buffer for partial rendering*/
-    LV_ATTRIBUTE_MEM_ALIGN
-    static uint8_t buf_1_1[MY_DISP_HOR_RES * MY_DISP_VER_RES / 10 * BYTE_PER_PIXEL]; /*A buffer for 10 rows*/
-    lv_display_set_buffers(disp, buf_1_1, NULL, sizeof(buf_1_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
+    constexpr auto buffer_size = (MY_DISP_HOR_RES * MY_DISP_VER_RES * BYTE_PER_PIXEL);
 
+    /* 必须要开启PSRAM，否则内存不够！ */
+    auto *buf_1_1_d = static_cast<uint8_t *>(malloc(buffer_size));
+    lv_display_set_buffers(disp, buf_1_1_d, nullptr, buffer_size, LV_DISPLAY_RENDER_MODE_PARTIAL);
+
+    // /* Example 1
+    //  * One buffer for partial rendering*/
+    // LV_ATTRIBUTE_MEM_ALIGN
+    // static uint8_t buf_1_1[MY_DISP_HOR_RES * MY_DISP_VER_RES / 10 * BYTE_PER_PIXEL]; /*A buffer for 10 rows*/
+    // lv_display_set_buffers(disp, buf_1_1, NULL, sizeof(buf_1_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
+    //
     // /* Example 2
     //  * Two buffers for partial rendering
     //  * In flush_cb DMA or similar hardware should be used to update the display in the background.*/
@@ -94,21 +100,19 @@ void lv_port_disp_init(void) {
 /*Initialize your display and the required peripherals.*/
 static void disp_init(void) {
     M5.Display.setRotation(0);
-    M5.Display.setFont(&fonts::DejaVu40);
-    M5.Display.clearDisplay();
 }
 
 volatile bool disp_flush_enabled = true;
 
 /* Enable updating the screen (the flushing process) when disp_flush() is called by LVGL
  */
-void disp_enable_update(void) {
+inline void disp_enable_update(void) {
     disp_flush_enabled = true;
 }
 
 /* Disable updating the screen (the flushing process) when disp_flush() is called by LVGL
  */
-void disp_disable_update(void) {
+inline void disp_disable_update(void) {
     disp_flush_enabled = false;
 }
 
@@ -117,13 +121,13 @@ void disp_disable_update(void) {
  *You can use DMA or any hardware acceleration to do this operation in the background but
  *'lv_display_flush_ready()' has to be called when it's finished.*/
 static void disp_flush(lv_display_t *disp_drv, const lv_area_t *area, uint8_t *px_map) {
-    auto w = area->x2 - area->x1 + 1;
-    auto h = area->y2 - area->y1 + 1;
+    if (disp_enable_update) {
+        const uint32_t w = area->x2 - area->x1 + 1;
+        const uint32_t h = area->y2 - area->y1 + 1;
 
-    M5.Display.startWrite();
-    M5.Display.setAddrWindow(area->x1, area->y1, w, h);
-    M5.Display.pushPixels(px_map, w * h);
-    M5.Display.endWrite();
+        lv_draw_sw_rgb565_swap(px_map, w * h);
+        M5.Display.pushImageDMA<uint16_t>(area->x1, area->y1, w, h, (uint16_t *) px_map);
+    }
 
     /*IMPORTANT!!!
      *Inform the graphics library that you are ready with the flushing*/

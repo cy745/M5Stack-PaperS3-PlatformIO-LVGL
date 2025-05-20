@@ -11,6 +11,7 @@ uint32_t my_tick_get_cb() {
 lv_obj_t *label;
 
 void setup() {
+    esp_spiram_add_to_heapalloc();
     M5_BEGIN();
     Serial.begin(115200);
     M5.Power.begin();
@@ -25,8 +26,9 @@ void setup() {
         Serial.println("LittleFS mounted");
     }
 
-    label = lv_label_create(lv_screen_active());
-    lv_label_set_text(label, "Hello Arduino, I'm LVGL!");
+    Serial.printf("PSRAM size: %d\n", esp_spiram_get_size());
+    Serial.printf("Heap free size: %d\n", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+    Serial.printf("Heap total size: %d\n", heap_caps_get_total_size(MALLOC_CAP_8BIT));
 
     Serial.println("Start drawing!");
 }
