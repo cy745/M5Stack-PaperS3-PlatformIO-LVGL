@@ -29,7 +29,7 @@
  *   GLOBAL FUNCTIONS
  **********************/
 
-lv_obj_t * icon_create(lv_obj_t * parent)
+lv_obj_t * icon_create(lv_obj_t * parent, void * src)
 {
     LV_TRACE_OBJ_CREATE("begin");
 
@@ -55,7 +55,7 @@ lv_obj_t * icon_create(lv_obj_t * parent)
     lv_obj_t * lv_image_1 = lv_image_create(parent);
         lv_obj_add_style(lv_image_1, &style_main, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_style(lv_image_1, &style_off, LV_PART_MAIN | LV_STATE_DISABLED);
-    lv_image_set_src(lv_image_1, wifi_icon);
+    lv_image_set_src(lv_image_1, src);
     lv_image_set_inner_align(lv_image_1, LV_IMAGE_ALIGN_STRETCH);
 
 

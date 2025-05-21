@@ -26,7 +26,7 @@ extern "C" {
  * GLOBAL PROTOTYPES
  **********************/
 
-lv_obj_t * status_bar_create(lv_obj_t * parent, const char * time, const char * battery_percent);
+lv_obj_t * status_bar_create(lv_obj_t * parent, lv_subject_t * time, lv_subject_t * battery_percent);
 
 /**********************
  *      MACROS

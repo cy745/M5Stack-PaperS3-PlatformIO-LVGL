@@ -24,7 +24,6 @@ extern "C" {
 #include "components/icon/icon_gen.h"
 #include "components/row/row_gen.h"
 #include "components/status_bar/status_bar_gen.h"
-#include "components/text/text_gen.h"
 #include "screens/home/home_gen.h"
 
 /*********************
@@ -55,6 +54,8 @@ extern const void * wifi_icon;
 /* Subjects */
 extern lv_subject_t subject_wifi_connected;
 extern lv_subject_t subject_is_charging;
+extern lv_subject_t subject_battery_percent_value;
+extern lv_subject_t subject_curretn_time_value;
 
 /**********************
  * GLOBAL PROTOTYPES

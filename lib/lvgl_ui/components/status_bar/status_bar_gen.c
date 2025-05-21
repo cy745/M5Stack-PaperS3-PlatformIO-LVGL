@@ -29,7 +29,7 @@
  *   GLOBAL FUNCTIONS
  **********************/
 
-lv_obj_t * status_bar_create(lv_obj_t * parent, const char * time, const char * battery_percent)
+lv_obj_t * status_bar_create(lv_obj_t * parent, lv_subject_t * time, lv_subject_t * battery_percent)
 {
     LV_TRACE_OBJ_CREATE("begin");
 
@@ -59,19 +59,25 @@ lv_obj_t * status_bar_create(lv_obj_t * parent, const char * time, const char * 
         lv_obj_add_style(lv_obj_1, &style_main, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_flag(lv_obj_1, LV_OBJ_FLAG_SCROLLABLE, false);
 
-    lv_obj_t * text_1 = text_create(lv_obj_1, time);
-    lv_obj_set_flex_grow(text_1, 1);
+    lv_obj_t * lv_label_1 = lv_label_create(lv_obj_1);
+    
+    lv_label_bind_text(lv_label_1, time, NULL);
 
-    lv_obj_t * icon_1 = icon_create(lv_obj_1);
+    lv_obj_t * lv_obj_2 = lv_obj_create(lv_obj_1);
+    lv_obj_set_flex_grow(lv_obj_2, 1);
+
+    lv_obj_t * icon_1 = icon_create(lv_obj_1, wifi_icon);
     lv_obj_bind_state_if_eq(icon_1, &subject_wifi_connected, LV_STATE_DISABLED, 0);
 
-    lv_obj_t * icon_2 = icon_create(lv_obj_1);
+    lv_obj_t * icon_2 = icon_create(lv_obj_1, is_charging);
     lv_obj_bind_state_if_eq(icon_2, &subject_is_charging, LV_STATE_DISABLED, 0);
 
-    lv_obj_t * icon_3 = icon_create(lv_obj_1);
+    lv_obj_t * icon_3 = icon_create(lv_obj_1, battery_low);
     lv_obj_bind_state_if_eq(icon_3, &subject_is_charging, LV_STATE_DISABLED, 0);
 
-    text_create(lv_obj_1, battery_percent);
+    lv_obj_t * lv_label_2 = lv_label_create(lv_obj_1);
+    
+    lv_label_bind_text(lv_label_2, battery_percent, NULL);
 
 
     LV_TRACE_OBJ_CREATE("finished");

@@ -45,6 +45,7 @@ lv_obj_t * home_create(void)
         lv_style_set_radius(&style_screen, 0);
         lv_style_set_border_width(&style_screen, 0);
         lv_style_set_pad_all(&style_screen, 0);
+        lv_style_set_bg_color(&style_screen, lv_color_hex(0xffffff));
 
         style_inited = true;
     }
@@ -53,7 +54,7 @@ lv_obj_t * home_create(void)
         lv_obj_add_style(lv_obj_1, &style_screen, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_flag(lv_obj_1, LV_OBJ_FLAG_SCROLLABLE, false);
 
-    status_bar_create(lv_obj_1, "18:30", "67");
+    status_bar_create(lv_obj_1, &subject_curretn_time_value, &subject_battery_percent_value);
 
 
     LV_TRACE_OBJ_CREATE("finished");
