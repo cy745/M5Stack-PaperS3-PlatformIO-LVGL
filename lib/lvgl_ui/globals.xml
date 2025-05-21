@@ -1,0 +1,28 @@
+<globals>
+    <api>
+        <!-- Add <enumdefs> here -->
+    </api>
+
+    <consts>
+        <!-- Add <px>, <int>, <color> etc here -->
+    </consts>
+
+    <styles>
+        <!-- Add <style> tags here -->
+    </styles>
+
+    <images>
+        <data name="battery_low" src_path="images/battery_low.png"/>
+        <data name="is_charging" src_path="images/is_charging.png"/>
+        <data name="wifi_icon" src_path="images/wifi_icon.png"/>
+    </images>
+
+    <fonts>
+        <!-- Add <bin> , <tiny_ttf>, <freetype> tags here -->
+    </fonts>
+
+    <subjects>
+        <int name="wifi_connected" value="17"/>
+        <int name="is_charging" value="18" />
+    </subjects>
+</globals>

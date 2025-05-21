@@ -1,0 +1,9 @@
+<component>
+    <api>
+        <prop name="text" type="string" default="Enter Your Text Here"></prop>
+    </api>
+    <styles>
+        <style name="main" />
+    </styles>
+    <view extends="lv_label" text="$text" styles="main"></view>
+</component>
