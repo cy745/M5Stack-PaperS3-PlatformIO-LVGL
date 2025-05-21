@@ -3,6 +3,7 @@
 #include "LittleFS.h"
 #include "lv_port_disp_m5.hpp"
 #include "ui.h"
+#include "time/MTime.h"
 
 void setup() {
     esp_spiram_add_to_heapalloc();
@@ -45,6 +46,7 @@ void setup() {
     Serial.println("Start drawing!");
     ui_init("Z:/");
     lv_screen_load(home_create());
+    mtime_setup();
 }
 
 void loop() {
