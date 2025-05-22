@@ -3,7 +3,7 @@
 #include "LittleFS.h"
 #include "lv_port_disp_m5.hpp"
 #include "ui.h"
-#include "time/MTime.h"
+#include "status_bar/status_bar.hpp"
 
 void setup() {
     esp_spiram_add_to_heapalloc();
@@ -43,10 +43,13 @@ void setup() {
     Serial.printf("Fs total size: %d\n", LittleFS.totalBytes());
     Serial.printf("Fs used size: %d\n", LittleFS.usedBytes());
 
-    Serial.println("Start drawing!");
+    Serial.println("Lvgl initializing!");
     ui_init("Z:/");
+    status_bar_setup();
+
+    vTaskDelay(1000);
+    Serial.println("Start drawing!");
     lv_screen_load(home_create());
-    mtime_setup();
 }
 
 void loop() {
