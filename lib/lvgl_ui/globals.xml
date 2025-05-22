@@ -22,8 +22,8 @@
     </fonts>
 
     <subjects>
-        <int name="wifi_connected" value="17"/>
-        <int name="is_charging" value="18"/>
+        <int name="wifi_connected" value="0"/>
+        <int name="is_charging" value="0"/>
         <string name="battery_percent_value" value="0" />
         <string name="curretn_time_value" value="00:00" />
     </subjects>

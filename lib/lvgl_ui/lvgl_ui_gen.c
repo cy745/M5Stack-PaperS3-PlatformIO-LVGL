@@ -61,8 +61,8 @@ void lvgl_ui_init_gen(const char * asset_path)
     /* Global Styles */
 
     /* Subjects */
-    lv_subject_init_int(&subject_wifi_connected, 17);
-    lv_subject_init_int(&subject_is_charging, 18);
+    lv_subject_init_int(&subject_wifi_connected, 0);
+    lv_subject_init_int(&subject_is_charging, 0);
     static char subject_battery_percent_value_buf[UI_SUBJECT_STRING_LENGTH];
     static char subject_battery_percent_value_prev_buf[UI_SUBJECT_STRING_LENGTH];
     lv_subject_init_string(&subject_battery_percent_value,

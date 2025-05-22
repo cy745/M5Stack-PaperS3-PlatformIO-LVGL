@@ -47,7 +47,7 @@ lv_obj_t * icon_create(lv_obj_t * parent, void * src)
         lv_style_set_image_recolor_opa(&style_main, 255);
 
         lv_style_init(&style_off);
-        lv_style_set_image_opa(&style_off, 128);
+        lv_style_set_image_recolor(&style_off, lv_color_hex(0x9a9a9a));
 
         style_inited = true;
     }

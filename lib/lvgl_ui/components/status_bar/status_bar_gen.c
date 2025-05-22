@@ -40,7 +40,7 @@ lv_obj_t * status_bar_create(lv_obj_t * parent, lv_subject_t * time, lv_subject_
     if (!style_inited) {
         
         lv_style_init(&style_main);
-        lv_style_set_bg_color(&style_main, lv_color_hex(0xF0F0F0));
+        lv_style_set_bg_color(&style_main, lv_color_hex(0xD4D4D4));
         lv_style_set_border_width(&style_main, 0);
         lv_style_set_radius(&style_main, 0);
         lv_style_set_width(&style_main, lv_pct(100));
@@ -65,6 +65,8 @@ lv_obj_t * status_bar_create(lv_obj_t * parent, lv_subject_t * time, lv_subject_
 
     lv_obj_t * lv_obj_2 = lv_obj_create(lv_obj_1);
     lv_obj_set_flex_grow(lv_obj_2, 1);
+    lv_obj_set_style_bg_color(lv_obj_2, lv_color_hex(0xD4D4D4), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(lv_obj_2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_t * icon_1 = icon_create(lv_obj_1, wifi_icon);
     lv_obj_bind_state_if_eq(icon_1, &subject_wifi_connected, LV_STATE_DISABLED, 0);

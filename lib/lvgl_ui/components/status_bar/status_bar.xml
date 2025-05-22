@@ -4,10 +4,10 @@
         <prop name="battery_percent" type="subject" default="battery_percent_value"></prop>
     </api>
     <consts>
-        <string name="empty_text" value="" />
+        <color name="bg_color" value="0xD4D4D4" />
     </consts>
     <styles>
-        <style name="main" bg_color="0xF0F0F0"
+        <style name="main" bg_color="#bg_color"
         border_width="0"
         radius="0" width="100%" height="50"
         pad_hor="16"
@@ -21,7 +21,7 @@
 
     <view styles="main" scrollable="false">
         <lv_label bind_text="$time" />
-        <lv_obj flex_grow="1" />
+        <lv_obj flex_grow="1" style_bg_color="#bg_color" style_border_width="0" />
         <icon src="wifi_icon" bind_state_if_eq="wifi_connected disabled 0"/>
         <icon src="is_charging" bind_state_if_eq="is_charging disabled 0"/>
         <icon src="battery_low" bind_state_if_eq="is_charging disabled 0"/>
