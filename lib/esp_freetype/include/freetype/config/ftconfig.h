@@ -47,4 +47,8 @@
 
 #endif /* FTCONFIG_H_ */
 
+#ifndef FT_ERR_PREFIX
+#define FT_ERR_PREFIX FT_Err_
+#endif
+
 /* END */
