@@ -4,34 +4,57 @@
 #define STATUS_BAR_UI_H
 
 #include "M5Unified.h"
-#include "ui.h"
+#include "generated/gui_guider.h"
 
-[[noreturn]]
-inline void update_status_bar(void *params) {
-    const auto timeStr = new char[10];
-    const auto powerStr = new char[10];
-    Serial.println("[update_status_bar] task started.");
+static lv_ui *m_ui = nullptr;
+static lv_timer_t *timer;
+const auto timeStr = new char[10];
+const auto powerStr = new char[10];
 
-    while (true) {
-        const auto time = M5.Rtc.getTime();
-        const auto power = M5.Power.getBatteryLevel();
-        const auto isCharging = M5.Power.isCharging();
-        sprintf(timeStr, "%02d:%02d", time.hours, time.minutes);
-        sprintf(powerStr, "%d%%", power);
+void update_cb(lv_timer_t *t) {
+    const auto time = M5.Rtc.getTime();
+    const auto power = M5.Power.getBatteryLevel();
+    const auto isCharging = M5.Power.isCharging();
+    sprintf(timeStr, "%02d:%02d", time.hours, time.minutes);
+    sprintf(powerStr, "%d%%", power);
 
-        Serial.printf("current_time_update: %s\n", timeStr);
-        Serial.printf("current_power_level: %s\n", powerStr);
-        Serial.printf("is_charging: %d\n", isCharging);
+    if (m_ui == nullptr) return;
 
-        lv_subject_set_int(&subject_is_charging, isCharging);
-        lv_subject_copy_string(&subject_curretn_time_value, timeStr);
-        lv_subject_copy_string(&subject_battery_percent_value, powerStr);
-        vTaskDelay(5 * 1000 / portTICK_PERIOD_MS);
+    if (m_ui->home_screen_time != nullptr) {
+        auto oldTimeStr = lv_label_get_text(m_ui->home_screen_time);
+        if (lv_strcmp(oldTimeStr, timeStr)) {
+            lv_label_set_text(m_ui->home_screen_time, timeStr);
+        }
+    }
+
+    if (m_ui->home_screen_power_percent != nullptr) {
+        auto oldPowerStr = lv_label_get_text(m_ui->home_screen_power_percent);
+        if (lv_strcmp(oldPowerStr, powerStr)) {
+            lv_label_set_text(m_ui->home_screen_power_percent, powerStr);
+        }
     }
 }
 
+extern "C" {
+void on_home_screen_loaded() {
+    if (timer != nullptr) {
+        lv_timer_delete(timer);
+        timer = nullptr;
+    }
+    timer = lv_timer_create(update_cb, 5000, nullptr);
+}
 
-inline void status_bar_setup() {
+void on_home_screen_unload() {
+    if (timer != nullptr) {
+        lv_timer_delete(timer);
+        timer = nullptr;
+    }
+}
+}
+
+inline void status_bar_setup(lv_ui *ui) {
+    m_ui = ui;
+
     if (M5.Rtc.begin()) {
         Serial.println("RTC initialized.");
     } else {
@@ -43,8 +66,6 @@ inline void status_bar_setup() {
     } else {
         Serial.println("Power not found.");
     }
-
-    xTaskCreate(update_status_bar, "update_status_bar", 4096, nullptr, 1, nullptr);
 }
 
 #endif

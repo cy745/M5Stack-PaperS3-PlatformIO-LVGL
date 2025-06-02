@@ -2,57 +2,68 @@
 #include "M5Unified.h"
 #include "LittleFS.h"
 #include "lv_port_disp_m5.hpp"
-#include "ui.h"
 #include "status_bar/status_bar.hpp"
+#include "sd_card/sd_card.hpp"
+#include "generated/gui_guider.h"
+
+auto bookX = new int[9]{0, 170, 340, 0, 170, 340, 0, 170, 340};
+auto bookY = new int[9]{0, 0, 0, 250, 250, 250, 500, 500, 500};
+lv_ui guider_ui = lv_ui{};
+lv_font_t lv_font_HarmonyOS_SansSC_Regular_144;
+
+void check_for_force_refresh() {
+    if (NEED_FORCE_REFRESH) {
+        Serial.println("Performing full screen refresh to clear ghosting...");
+        lv_obj_invalidate(lv_screen_active()); // 标记整个屏幕为无效区域
+        lv_refr_now(lv_display_get_default()); // 强制立即刷新
+        NEED_FORCE_REFRESH = 0;
+    }
+}
 
 void setup() {
-    esp_spiram_add_to_heapalloc();
     M5_BEGIN();
     Serial.begin(115200);
     M5.Power.begin();
 
+    sd_card_setup();
+
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+
     if (!LittleFS.begin()) {
-        Serial.println("Failed to mount LittleFS");
+        M5.Display.println("Failed to mount LittleFS");
     } else {
-        Serial.println("LittleFS mounted");
+        M5.Display.println("LittleFS mounted");
     }
-
-    lv_init();
-    lv_tick_set_cb([]() -> uint32_t { return esp_timer_get_time() / 1000; });
-    lv_port_disp_init();
-
-    lv_indev_t *indev = lv_indev_create();
-    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
-    lv_indev_set_read_cb(indev, [](lv_indev_t *_index, lv_indev_data_t *data) {
-        M5_UPDATE();
-        const auto count = M5.Touch.getCount();
-
-        if (count == 0) {
-            data->state = LV_INDEV_STATE_RELEASED;
-        } else {
-            const auto touch = M5.Touch.getDetail(0);
-            data->state = LV_INDEV_STATE_PRESSED;
-            data->point.x = touch.x;
-            data->point.y = touch.y;
-        }
-    });
 
     Serial.printf("PSRAM size: %d\n", esp_spiram_get_size());
     Serial.printf("Heap free size: %d\n", heap_caps_get_free_size(MALLOC_CAP_8BIT));
     Serial.printf("Heap total size: %d\n", heap_caps_get_total_size(MALLOC_CAP_8BIT));
     Serial.printf("Fs total size: %d\n", LittleFS.totalBytes());
     Serial.printf("Fs used size: %d\n", LittleFS.usedBytes());
+    M5.Display.printf("PSRAM size: %d\n", esp_spiram_get_size());
+    M5.Display.printf("Heap free size: %d\n", heap_caps_get_free_size(MALLOC_CAP_8BIT));
+    M5.Display.printf("Heap total size: %d\n", heap_caps_get_total_size(MALLOC_CAP_8BIT));
+    M5.Display.printf("Fs total size: %d\n", LittleFS.totalBytes());
+    M5.Display.printf("Fs used size: %d\n", LittleFS.usedBytes());
 
-    Serial.println("Lvgl initializing!");
-    ui_init("Z:/");
-    status_bar_setup();
+    M5.Display.println("Lvgl initializing!");
 
-    vTaskDelay(1000);
-    Serial.println("Start drawing!");
-    lv_screen_load(home_create());
+    lv_port_disp_init();
+
+    auto font = lv_freetype_font_create("/sd/HarmonyOS_SansSC_Regular.ttf",
+                                        LV_FREETYPE_FONT_RENDER_MODE_BITMAP, 144,
+                                        LV_FREETYPE_FONT_STYLE_NORMAL);
+    if (font) {
+        lv_font_HarmonyOS_SansSC_Regular_144 = *font;
+    } else {
+        lv_font_HarmonyOS_SansSC_Regular_144 = lv_font_HarmonyOS_SansSC_Regular_24;
+    }
+
+    setup_ui(&guider_ui);
+    status_bar_setup(&guider_ui);
+    M5.Display.println("Start drawing!");
 }
 
 void loop() {
-    lv_timer_handler();
-    vTaskDelay(1);
+    vTaskDelay(lv_task_handler() / portTICK_PERIOD_MS);
 }

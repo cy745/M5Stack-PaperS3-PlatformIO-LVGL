@@ -1,5 +1,5 @@
 /**
- * @file lv_port_disp_templ.c
+ * @file lv_port_disp_m5.hpp
  *
  */
 
@@ -32,9 +32,11 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static void disp_init(void);
+static void disp_init();
 
 static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
+
+static void touch_init();
 
 /**********************
  *  STATIC VARIABLES
@@ -48,89 +50,100 @@ static void disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_ma
  *   GLOBAL FUNCTIONS
  **********************/
 
-inline void lv_port_disp_init(void) {
-    /*-------------------------
-     * Initialize your display
-     * -----------------------*/
+inline void lv_port_disp_init() {
     disp_init();
+    lv_init();
 
-    /*------------------------------------
-     * Create a display and set a flush_cb
-     * -----------------------------------*/
+    // 创建Display
     lv_display_t *disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
     lv_display_set_flush_cb(disp, disp_flush);
 
+    // 创建显示缓冲区，必须要开启PSRAM，否则内存不够！
     constexpr auto buffer_size = (MY_DISP_HOR_RES * MY_DISP_VER_RES * BYTE_PER_PIXEL);
-
-    /* 必须要开启PSRAM，否则内存不够！ */
-    auto *buf_1_1_d = static_cast<uint8_t *>(malloc(buffer_size));
+    auto *buf_1_1_d = ps_malloc(buffer_size);
     lv_display_set_buffers(disp, buf_1_1_d, nullptr, buffer_size, LV_DISPLAY_RENDER_MODE_PARTIAL);
 
-    // /* Example 1
-    //  * One buffer for partial rendering*/
-    // LV_ATTRIBUTE_MEM_ALIGN
-    // static uint8_t buf_1_1[MY_DISP_HOR_RES * MY_DISP_VER_RES / 10 * BYTE_PER_PIXEL]; /*A buffer for 10 rows*/
-    // lv_display_set_buffers(disp, buf_1_1, NULL, sizeof(buf_1_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
-    //
-    // /* Example 2
-    //  * Two buffers for partial rendering
-    //  * In flush_cb DMA or similar hardware should be used to update the display in the background.*/
-    // LV_ATTRIBUTE_MEM_ALIGN
-    // static uint8_t buf_2_1[MY_DISP_HOR_RES * 10 * BYTE_PER_PIXEL];
-    //
-    // LV_ATTRIBUTE_MEM_ALIGN
-    // static uint8_t buf_2_2[MY_DISP_HOR_RES * 10 * BYTE_PER_PIXEL];
-    // lv_display_set_buffers(disp, buf_2_1, buf_2_2, sizeof(buf_2_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
-    //
-    // /* Example 3
-    //  * Two buffers screen sized buffer for double buffering.
-    //  * Both LV_DISPLAY_RENDER_MODE_DIRECT and LV_DISPLAY_RENDER_MODE_FULL works, see their comments*/
-    // LV_ATTRIBUTE_MEM_ALIGN
-    // static uint8_t buf_3_1[MY_DISP_HOR_RES * MY_DISP_VER_RES * BYTE_PER_PIXEL];
-    //
-    // LV_ATTRIBUTE_MEM_ALIGN
-    // static uint8_t buf_3_2[MY_DISP_HOR_RES * MY_DISP_VER_RES * BYTE_PER_PIXEL];
-    // lv_display_set_buffers(disp, buf_3_1, buf_3_2, sizeof(buf_3_1), LV_DISPLAY_RENDER_MODE_DIRECT);
+    // 设置刷新回调
+    lv_tick_set_cb([]() -> uint32_t { return esp_timer_get_time() / 1000; });
+
+    // 初始化触摸
+    touch_init();
 }
 
 /**********************
  *   STATIC FUNCTIONS
  **********************/
 
-/*Initialize your display and the required peripherals.*/
-static void disp_init(void) {
+constexpr uint8_t FULL_REFRESH_INTERVAL = 20; // 局部刷新次数
+constexpr uint32_t MIN_FULL_REFRESH_INTERVAL_MS = 5000; // 最小刷新间隔 ms
+static uint8_t flush_counter = 0;
+static uint32_t last_full_refresh_time = 0;
+static int NEED_FORCE_REFRESH = 0;
+
+static void handle_global_refresh_counter() {
+    flush_counter++;
+    const uint32_t now = millis();
+
+    // 判断是否需要进行全屏刷新
+    if (!NEED_FORCE_REFRESH && flush_counter >= FULL_REFRESH_INTERVAL && (now - last_full_refresh_time) >=
+        MIN_FULL_REFRESH_INTERVAL_MS) {
+        Serial.println("Setting flag to full screen refresh to clear ghosting...");
+
+        NEED_FORCE_REFRESH = 1;
+
+        flush_counter = 0;
+        last_full_refresh_time = now;
+    }
+}
+
+static void disp_init() {
     M5.Display.setRotation(0);
+}
+
+static void touch_init() {
+    lv_indev_t *indev = lv_indev_create();
+    lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(indev, [](lv_indev_t *_index, lv_indev_data_t *data) {
+        M5_UPDATE();
+        const auto count = M5.Touch.getCount();
+
+        if (count == 0) {
+            data->state = LV_INDEV_STATE_RELEASED;
+        } else {
+            const auto touch = M5.Touch.getDetail(0);
+            data->state = LV_INDEV_STATE_PRESSED;
+            data->point.x = touch.x;
+            data->point.y = touch.y;
+        }
+    });
 }
 
 volatile bool disp_flush_enabled = true;
 
-/* Enable updating the screen (the flushing process) when disp_flush() is called by LVGL
- */
-inline void disp_enable_update(void) {
+inline void disp_enable_update() {
     disp_flush_enabled = true;
 }
 
-/* Disable updating the screen (the flushing process) when disp_flush() is called by LVGL
- */
-inline void disp_disable_update(void) {
+inline void disp_disable_update() {
     disp_flush_enabled = false;
 }
 
-/*Flush the content of the internal buffer the specific area on the display.
- *`px_map` contains the rendered image as raw pixel map, and it should be copied to `area` on the display.
- *You can use DMA or any hardware acceleration to do this operation in the background but
- *'lv_display_flush_ready()' has to be called when it's finished.*/
 static void disp_flush(lv_display_t *disp_drv, const lv_area_t *area, uint8_t *px_map) {
-    if (disp_enable_update) {
-        const uint32_t w = area->x2 - area->x1 + 1;
-        const uint32_t h = area->y2 - area->y1 + 1;
-
-        lv_draw_sw_rgb565_swap(px_map, w * h);
-        M5.Display.pushImageDMA<uint16_t>(area->x1, area->y1, w, h, (uint16_t *) px_map);
+    if (!disp_flush_enabled) {
+        lv_display_flush_ready(disp_drv);
+        return;
     }
 
-    /*IMPORTANT!!!
-     *Inform the graphics library that you are ready with the flushing*/
+    const uint32_t w = area->x2 - area->x1 + 1;
+    const uint32_t h = area->y2 - area->y1 + 1;
+
+    handle_global_refresh_counter();
+
+    M5.Display.startWrite();
+    M5.Display.setWindow(area->x1, area->y1, area->x2, area->y2);
+    M5.Display.writePixelsDMA((uint16_t *) px_map, w * h);
+    M5.Display.endWrite();
+
     lv_display_flush_ready(disp_drv);
 }
 
