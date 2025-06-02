@@ -1,0 +1,1 @@
+GEN_CSRCS += lv_font_HarmonyOS_SansSC_Regular_20.c lv_font_montserratMedium_16.c lv_font_HarmonyOS_SansSC_Regular_144.c lv_font_HarmonyOS_SansSC_Regular_24.c
