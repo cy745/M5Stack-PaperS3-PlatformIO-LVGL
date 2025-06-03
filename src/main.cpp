@@ -9,6 +9,7 @@
 #include "home_screen/home_screen.h"
 #include "lock_screen/lock_screen.h"
 #include "status_bar/status_bar.h"
+#include "services/sync_time_service.h"
 
 auto bookX = new int[9]{0, 170, 340, 0, 170, 340, 0, 170, 340};
 auto bookY = new int[9]{0, 0, 0, 250, 250, 250, 500, 500, 500};
@@ -51,6 +52,7 @@ void setup() {
 
     lv_port_disp_init();
     setup_freetype_fonts();
+    setup_sync_time_service();
 
     setup_ui(&guider_ui);
     status_bar_setup();
