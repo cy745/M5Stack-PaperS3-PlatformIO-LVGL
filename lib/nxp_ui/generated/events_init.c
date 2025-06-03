@@ -17,6 +17,8 @@
 
 void on_home_screen_loaded();
 void on_home_screen_unload();
+void on_lock_screen_loaded();
+void on_lock_screen_unload();
 
 static void home_screen_event_handler (lv_event_t *e)
 {
@@ -64,6 +66,16 @@ static void lock_screen_event_handler (lv_event_t *e)
     case LV_EVENT_CLICKED:
     {
         ui_load_scr_animation(&guider_ui, &guider_ui.home_screen, guider_ui.home_screen_del, &guider_ui.lock_screen_del, setup_scr_home_screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, true, true);
+        break;
+    }
+    case LV_EVENT_SCREEN_LOADED:
+    {
+        on_lock_screen_loaded();
+        break;
+    }
+    case LV_EVENT_SCREEN_UNLOAD_START:
+    {
+        on_lock_screen_unload();
         break;
     }
     default:
