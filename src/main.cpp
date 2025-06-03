@@ -1,4 +1,6 @@
 #include "main.hpp"
+
+#include "freetype_setup.hpp"
 #include "M5Unified.h"
 #include "LittleFS.h"
 #include "lv_port_disp_m5.hpp"
@@ -11,7 +13,6 @@
 auto bookX = new int[9]{0, 170, 340, 0, 170, 340, 0, 170, 340};
 auto bookY = new int[9]{0, 0, 0, 250, 250, 250, 500, 500, 500};
 lv_ui guider_ui = lv_ui{};
-lv_font_t lv_font_HarmonyOS_SansSC_Regular_144;
 
 void check_for_force_refresh() {
     if (NEED_FORCE_REFRESH) {
@@ -49,15 +50,7 @@ void setup() {
     M5.Display.println("Lvgl initializing!");
 
     lv_port_disp_init();
-
-    auto font = lv_freetype_font_create("/sd/HarmonyOS_SansSC_Regular.ttf",
-                                        LV_FREETYPE_FONT_RENDER_MODE_BITMAP, 144,
-                                        LV_FREETYPE_FONT_STYLE_NORMAL);
-    if (font) {
-        lv_font_HarmonyOS_SansSC_Regular_144 = *font;
-    } else {
-        lv_font_HarmonyOS_SansSC_Regular_144 = *lv_font_get_default();
-    }
+    setup_freetype_fonts();
 
     setup_ui(&guider_ui);
     status_bar_setup();

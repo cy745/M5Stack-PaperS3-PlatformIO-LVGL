@@ -18,7 +18,7 @@ extern "C" {
 
 typedef struct
 {
-
+  
 	lv_obj_t *home_screen;
 	bool home_screen_del;
 	lv_obj_t *home_screen_status_bar;
@@ -66,11 +66,10 @@ void setup_scr_lock_screen(lv_ui *ui);
 LV_IMAGE_DECLARE(_wifi_icon_RGB565A8_24x24);
 LV_IMAGE_DECLARE(_Is_charging_RGB565A8_24x24);
 
-LV_FONT_DECLARE(lv_font_HarmonyOS_SansSC_Regular_20)
 LV_FONT_DECLARE(lv_font_montserratMedium_16)
 extern lv_font_t lv_font_HarmonyOS_SansSC_Regular_144;
-LV_FONT_DECLARE(lv_font_HarmonyOS_SansSC_Regular_24)
-
+extern lv_font_t lv_font_HarmonyOS_SansSC_Regular_24;
+extern lv_font_t lv_font_HarmonyOS_SansSC_Regular_20;
 
 #ifdef __cplusplus
 }
