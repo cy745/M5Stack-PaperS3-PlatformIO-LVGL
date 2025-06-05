@@ -9,7 +9,7 @@
 
 const auto TAG = "ZIPFILE";
 
-uint8_t *ZipFile::read_file_to_mem(const char *path_inside, size_t *size) const {
+uint8_t *ZipFile::read_file_to_memory(const char *path_inside, size_t *size) const {
     // open up the epub file using miniz
     mz_zip_archive zip_archive = {};
 

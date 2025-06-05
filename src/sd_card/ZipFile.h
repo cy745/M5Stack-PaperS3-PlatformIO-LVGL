@@ -18,7 +18,7 @@ public:
     }
 
     // read a file from the zip file allocating the required memory for the data
-    uint8_t *read_file_to_mem(const char *path_inside, size_t *size = nullptr) const;
+    uint8_t *read_file_to_memory(const char *path_inside, size_t *size = nullptr) const;
 
     bool read_file_to_file(const char *filename, const char *dest) const;
 };
