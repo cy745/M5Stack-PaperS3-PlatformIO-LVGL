@@ -11,6 +11,10 @@
 
 void home_screen_setup(lv_ui *ui);
 
+void load_book_shelf_task(void *params);
+
+static void load_book_shelf();
+
 static void update_home_screen(lv_timer_t *t);
 
 #endif
