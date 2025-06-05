@@ -109,10 +109,12 @@ bool Epub::parse_content_opf(ZipFile &zip, std::string &content_opf_file)
   }
   m_title = title->GetText();
   auto cover = metadata->FirstChildElement("meta");
-  while (cover && cover->Attribute("name") && strcmp(cover->Attribute("name"), "cover") != 0)
-  {
+  do {
+    if (cover->Attribute("name") && strcmp(cover->Attribute("name"), "cover") == 0) {
+      break;
+    }
     cover = cover->NextSiblingElement("meta");
-  }
+  } while (cover);
   if (!cover)
   {
     ESP_LOGW(TAG, "Missing cover");
