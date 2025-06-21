@@ -1,28 +1,11 @@
 #include "main.hpp"
 
-#include "freetype_setup.hpp"
 #include "M5Unified.h"
 #include "LittleFS.h"
-#include "lv_port_disp_m5.hpp"
 #include "sd_card/sd_card.hpp"
-#include "generated/gui_guider.h"
-#include "home_screen/home_screen.h"
-#include "lock_screen/lock_screen.h"
-#include "status_bar/status_bar.h"
-#include "services/sync_time_service.h"
+#include "font_render/OpenFontRender.h"
 
-auto bookX = new int[9]{0, 170, 340, 0, 170, 340, 0, 170, 340};
-auto bookY = new int[9]{0, 0, 0, 250, 250, 250, 500, 500, 500};
-lv_ui guider_ui = lv_ui{};
-
-void check_for_force_refresh() {
-    if (NEED_FORCE_REFRESH) {
-        Serial.println("Performing full screen refresh to clear ghosting...");
-        lv_obj_invalidate(lv_screen_active()); // 标记整个屏幕为无效区域
-        lv_refr_now(lv_display_get_default()); // 强制立即刷新
-        NEED_FORCE_REFRESH = 0;
-    }
-}
+static OpenFontRender render;
 
 void setup() {
     M5_BEGIN();
@@ -48,20 +31,40 @@ void setup() {
     M5.Display.printf("Fs total size: %d\n", LittleFS.totalBytes());
     M5.Display.printf("Fs used size: %d\n", LittleFS.usedBytes());
 
-    M5.Display.println("Lvgl initializing!");
+    render.setSerial(Serial);
+    render.showFreeTypeVersion(); // print FreeType version
+    render.showCredit(); // print FTL credit
 
-    lv_port_disp_init();
-    setup_freetype_fonts();
-    setup_sync_time_service();
+    if (render.loadFont("/sd/HarmonyOS_SansSC_Regular.ttf")) {
+        Serial.println("Render initialize error");
+        return;
+    }
 
-    setup_ui(&guider_ui);
-    status_bar_setup();
-    home_screen_setup(&guider_ui);
-    lock_screen_setup(&guider_ui);
+    M5.Display.fillScreen(TFT_WHITE);
 
-    M5.Display.println("Start drawing!");
+    render.setDrawer(M5.Display);
+    render.setCursor(10, 10);
+
+    render.printf("St\n");
+    unsigned long t_start = millis();
+
+    render.setFontColor(TFT_WHITE);
+    render.printf("Hello World\n");
+    render.seekCursor(0, 10);
+
+    render.setFontSize(30);
+    render.setFontColor(TFT_GREEN);
+    render.printf("完全なUnicodeサポート\n");
+    render.seekCursor(0, 10);
+
+    render.setFontSize(40);
+    render.setFontColor(TFT_ORANGE);
+    render.printf("こんにちは世界\n");
+
+    unsigned long t_end = millis();
+    Serial.printf("Time: %ld ms\n", t_end - t_start);
 }
 
 void loop() {
-    vTaskDelay(lv_task_handler() / portTICK_PERIOD_MS);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
 }

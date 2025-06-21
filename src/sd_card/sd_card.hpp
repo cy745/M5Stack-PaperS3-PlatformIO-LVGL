@@ -34,6 +34,7 @@ inline void sd_card_setup() {
     File file = root.openNextFile();
     while (file) {
         M5.Display.printf("NAME: %s\tSIZE: %u\n", file.name(), file.size());
+        Serial.printf("NAME: %s\t SIZE: %u\n", file.name(), file.size());
         file = root.openNextFile();
     }
 }

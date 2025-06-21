@@ -6,14 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include "image_io.h"
-#include "test_decoder.h"
+#include "jpeg_decoder.h"
 
-static jpeg_pixel_format_t j_type     = JPEG_PIXEL_FORMAT_RGB888;
-static jpeg_rotate_t       j_rotation = JPEG_ROTATE_0D;
+static jpeg_pixel_format_t j_type = JPEG_PIXEL_FORMAT_RGB565_LE;
+static jpeg_rotate_t j_rotation = JPEG_ROTATE_0D;
 
-jpeg_error_t esp_jpeg_decode_one_picture(uint8_t *input_buf, int len, uint8_t **output_buf, int *out_len)
-{
+jpeg_error_t esp_jpeg_decode_one_picture(uint8_t *input_buf, int len, uint8_t **output_buf, int *out_len) {
     uint8_t *out_buf = NULL;
     jpeg_error_t ret = JPEG_ERR_OK;
     jpeg_dec_io_t *jpeg_io = NULL;
@@ -55,6 +53,7 @@ jpeg_error_t esp_jpeg_decode_one_picture(uint8_t *input_buf, int len, uint8_t **
 
     // Parse jpeg picture header and get picture for user and decoder
     ret = jpeg_dec_parse_header(jpeg_dec, jpeg_io, out_info);
+    printf("ret: %d, header: %d\n", ret, out_info->width);
     if (ret != JPEG_ERR_OK) {
         goto jpeg_dec_failed;
     }
@@ -97,8 +96,7 @@ jpeg_dec_failed:
     return ret;
 }
 
-jpeg_error_t esp_jpeg_decode_one_picture_block(unsigned char *input_buf, int len)
-{
+jpeg_error_t esp_jpeg_decode_one_picture_block(unsigned char *input_buf, int len) {
     unsigned char *output_block = NULL;
     jpeg_error_t ret = JPEG_ERR_OK;
     jpeg_dec_io_t *jpeg_io = NULL;
@@ -205,8 +203,7 @@ jpeg_dec_failed:
     return ret;
 }
 
-jpeg_error_t esp_jpeg_stream_open(esp_jpeg_stream_handle_t jpeg_handle)
-{
+jpeg_error_t esp_jpeg_stream_open(esp_jpeg_stream_handle_t jpeg_handle) {
     jpeg_error_t ret = JPEG_ERR_OK;
 
     // Generate default configuration
@@ -252,8 +249,8 @@ jpeg_dec_failed:
     return ret;
 }
 
-jpeg_error_t esp_jpeg_stream_decode(esp_jpeg_stream_handle_t jpeg_handle, uint8_t *input_buf, int len, uint8_t **output_buf, int *out_len)
-{
+jpeg_error_t esp_jpeg_stream_decode(esp_jpeg_stream_handle_t jpeg_handle, uint8_t *input_buf, int len,
+                                    uint8_t **output_buf, int *out_len) {
     jpeg_error_t ret = JPEG_ERR_OK;
     unsigned char *out_buf = NULL;
 
@@ -295,8 +292,7 @@ jpeg_error_t esp_jpeg_stream_decode(esp_jpeg_stream_handle_t jpeg_handle, uint8_
     return ret;
 }
 
-jpeg_error_t esp_jpeg_stream_close(esp_jpeg_stream_handle_t jpeg_handle)
-{
+jpeg_error_t esp_jpeg_stream_close(esp_jpeg_stream_handle_t jpeg_handle) {
     jpeg_error_t ret = JPEG_ERR_OK;
 
     ret = jpeg_dec_close(jpeg_handle->jpeg_dec);

@@ -19,7 +19,7 @@
 #endif
 #include <map>
 #include "tinyxml2.h"
-#include "sd_card/ZipFile.h"
+#include "../zip_file/ZipFile.h"
 #include "Epub.h"
 
 static const char *TAG = "EPUB";

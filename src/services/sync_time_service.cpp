@@ -68,11 +68,10 @@ void sync_time_loop_task(void *params) {
         vTaskDelete(nullptr);
     }
 
-    configTime(GMT_TIME_OFFSET, 0, ntp_server_1, ntp_server_2, ntp_server_3);
+    configTzTime("CST-8", ntp_server_1, ntp_server_2, ntp_server_3);
     while (true) {
         Serial.printf("同步时间中....\n");
-        sntp_restart();
-        if (getLocalTime(&time_info, 1000)) {
+        if (sntp_restart() && getLocalTime(&time_info, 1000)) {
             Serial.printf("当前时间：%d年%d月%d日 星期%d %d:%d\n", time_info.tm_year, time_info.tm_mon, time_info.tm_mday,
                           time_info.tm_wday, time_info.tm_hour, time_info.tm_min);
             M5.Rtc.setDateTime(m5::rtc_datetime_t(time_info));

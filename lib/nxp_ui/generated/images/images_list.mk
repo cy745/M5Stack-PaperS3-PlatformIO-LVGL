@@ -1,1 +1,0 @@
-GEN_CSRCS += _wifi_icon_RGB565A8_24x24.c _Is_charging_RGB565A8_24x24.c

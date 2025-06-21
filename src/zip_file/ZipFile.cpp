@@ -20,14 +20,6 @@ uint8_t *ZipFile::read_file_to_memory(const char *path_inside, size_t *size) con
         return nullptr;
     }
 
-#ifdef DEBUG
-    const auto file_name_buffer = new char[256];
-    for (int i = 0; i < mz_zip_reader_get_num_files(&zip_archive); ++i) {
-        mz_zip_reader_get_filename(&zip_archive, i, file_name_buffer, 200);
-        ESP_LOGD(TAG, "readFile in %s, [%d]%s\n", source_path, i, file_name_buffer);
-    }
-#endif
-
     // find the file
     mz_uint32 file_index = 0;
     if (!mz_zip_reader_locate_file_v2(&zip_archive, path_inside, nullptr, 0, &file_index)) {
